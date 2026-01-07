@@ -694,37 +694,38 @@ export default function Campaign() {
                       </thead>
                       <tbody>
                         {revenueData.by_university
-                          .slice(0, 20)
-                          .map((uni, idx) => (
+                          ?.filter((uni) => uni)
+                          ?.slice(0, 20)
+                          ?.map((uni, idx) => (
                             <tr key={idx} className="border-b hover:bg-gray-50">
                               <td
                                 className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
-                                title={uni.UniversityName}
+                                title={uni?.UniversityName}
                               >
-                                {uni.UniversityName}
+                                {uni?.UniversityName}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
-                                {uni.student_count.toLocaleString()}
+                                {uni?.student_count?.toLocaleString?.() || "0"}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
                                 ₹
-                                {uni.total_revenue
+                                {uni?.total_revenue
                                   ? parseInt(uni.total_revenue).toLocaleString()
                                   : "0"}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
                                 ₹
-                                {uni.avg_revenue_per_student
+                                {uni?.avg_revenue_per_student
                                   ? parseInt(
                                       uni.avg_revenue_per_student
                                     ).toLocaleString()
                                   : "0"}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
-                                {uni.transaction_count.toLocaleString()}
+                                {uni?.transaction_count?.toLocaleString?.() || "0"}
                               </td>
                             </tr>
-                          ))}
+                          )) || []}
                       </tbody>
                     </table>
                   </div>
@@ -756,28 +757,33 @@ export default function Campaign() {
                       </tr>
                     </thead>
                     <tbody>
-                      {revenueData.by_course.slice(0, 20).map((course, idx) => (
-                        <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td
-                            className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
-                            title={course.Course}
-                          >
-                            {course.Course}
-                          </td>
-                          <td className="px-6 py-3 text-right text-gray-700">
-                            {course.student_count.toLocaleString()}
-                          </td>
-                          <td className="px-6 py-3 text-right text-gray-700">
-                            ₹{parseInt(course.total_revenue).toLocaleString()}
-                          </td>
-                          <td className="px-6 py-3 text-right text-gray-700">
-                            ₹
-                            {parseInt(
-                              course.avg_revenue_per_student
-                            ).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {revenueData.by_course
+                        ?.filter((course) => course)
+                        ?.slice(0, 20)
+                        ?.map((course, idx) => (
+                          <tr key={idx} className="border-b hover:bg-gray-50">
+                            <td
+                              className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
+                              title={course?.Course}
+                            >
+                              {course?.Course}
+                            </td>
+                            <td className="px-6 py-3 text-right text-gray-700">
+                              {course?.student_count?.toLocaleString?.() || "0"}
+                            </td>
+                            <td className="px-6 py-3 text-right text-gray-700">
+                              ₹{course?.total_revenue ? parseInt(course.total_revenue).toLocaleString() : "0"}
+                            </td>
+                            <td className="px-6 py-3 text-right text-gray-700">
+                              ₹
+                              {course?.avg_revenue_per_student
+                                ? parseInt(
+                                    course.avg_revenue_per_student
+                                  ).toLocaleString()
+                                : "0"}
+                            </td>
+                          </tr>
+                        )) || []}
                     </tbody>
                   </table>
                 </div>
