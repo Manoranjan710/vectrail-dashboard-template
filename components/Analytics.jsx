@@ -29,7 +29,10 @@ import {
 export default function Analytics() {
   const [data, setData] = useState(null);
   const [performanceData, setPerformanceData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [trendsData, setTrendsData] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(true);
+  const [loadingPerformance, setLoadingPerformance] = useState(true);
+  const [loadingTrends, setLoadingTrends] = useState(true);
   const [error, setError] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   
@@ -39,11 +42,13 @@ export default function Analytics() {
   
   const [startDate, setStartDate] = useState(thirtyDaysAgo);
   const [endDate, setEndDate] = useState(today);
+  const [granularity, setGranularity] = useState("daily");
 
   // Fetch original analytics summary
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
+        setLoadingSummary(true);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/analytics/summary`
         );
@@ -52,6 +57,8 @@ export default function Analytics() {
         setData(result.data);
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoadingSummary(false);
       }
     };
 
@@ -61,7 +68,7 @@ export default function Analytics() {
   // Fetch performance data with date range
   const fetchPerformanceData = async (start, end) => {
     try {
-      setLoading(true);
+      setLoadingPerformance(true);
       const startDateStr = format(start, "yyyy-MM-dd");
       const endDateStr = format(end, "yyyy-MM-dd");
       
@@ -74,13 +81,37 @@ export default function Analytics() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setLoadingPerformance(false);
+    }
+  };
+
+  // Fetch trends data with date range and granularity
+  const fetchTrendsData = async (start, end, granularityValue) => {
+    try {
+      setLoadingTrends(true);
+      const startDateStr = format(start, "yyyy-MM-dd");
+      const endDateStr = format(end, "yyyy-MM-dd");
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/analytics/trends?start_date=${startDateStr}&end_date=${endDateStr}&granularity=${granularityValue}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch trends data");
+      const result = await response.json();
+      setTrendsData(result.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingTrends(false);
     }
   };
 
   useEffect(() => {
     fetchPerformanceData(startDate, endDate);
   }, [startDate, endDate]);
+
+  useEffect(() => {
+    fetchTrendsData(startDate, endDate, granularity);
+  }, [startDate, endDate, granularity]);
 
   const handleDateChange = (e, dateType) => {
     const newDate = new Date(e.target.value);
@@ -195,6 +226,15 @@ export default function Analytics() {
     </div>
   );
 
+  const LoadingSpinner = ({ message = "Loading..." }) => (
+    <div className="flex items-center justify-center py-8">
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <p className="text-gray-500 text-sm">{message}</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-6">
       <h2 className="text-3xl font-bold mb-8 text-gray-900">
@@ -202,7 +242,9 @@ export default function Analytics() {
       </h2>
 
       {/* Original Analytics Summary */}
-      {data && (
+      {loadingSummary ? (
+        <LoadingSpinner message="Loading analytics summary..." />
+      ) : data ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Leads Section */}
           <SectionCard title="Leads" icon={BarChart3} color="#3B82F6">
@@ -277,7 +319,7 @@ export default function Analytics() {
             />
           </SectionCard>
         </div>
-      )}
+      ) : null}
 
       {/* Leads Performance Analytics Section */}
       <div className="mb-8">
@@ -331,10 +373,8 @@ export default function Analytics() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Loading analytics...</p>
-        </div>
+      {loadingPerformance ? (
+        <LoadingSpinner message="Loading performance analytics..." />
       ) : (
         <>
           {/* Summary Stats */}
@@ -557,6 +597,187 @@ export default function Analytics() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Trends Analysis Section */}
+          <div className="mb-8 mt-12">
+            <h2 className="text-3xl font-bold mb-6 text-gray-900">
+              Trends Analysis
+            </h2>
+
+            {/* Trends Date Range and Granularity Controls */}
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={20} className="text-gray-600" />
+                    <span className="text-gray-600 font-medium">Date Range:</span>
+                  </div>
+                  <input
+                    type="date"
+                    value={format(startDate, "yyyy-MM-dd")}
+                    onChange={(e) => setStartDate(new Date(e.target.value))}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-600">to</span>
+                  <input
+                    type="date"
+                    value={format(endDate, "yyyy-MM-dd")}
+                    onChange={(e) => setEndDate(new Date(e.target.value))}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex gap-2 items-center flex-wrap">
+                  <span className="text-gray-600 font-medium text-sm">Granularity:</span>
+                  <select
+                    value={granularity}
+                    onChange={(e) => setGranularity(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Trends Charts */}
+            {loadingTrends ? (
+              <LoadingSpinner message="Loading trends data..." />
+            ) : trendsData?.timeline && trendsData.timeline.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Leads Trend */}
+                <ChartCard title="Leads Trend">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trendsData.timeline}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="leads"
+                        stroke="#3B82F6"
+                        name="Leads"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="qualified_leads"
+                        stroke="#10B981"
+                        name="Qualified Leads"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+
+                {/* Admissions Trend */}
+                <ChartCard title="Admissions Trend">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trendsData.timeline}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="admissions"
+                        stroke="#F59E0B"
+                        name="Admissions"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+
+                {/* Transactions Trend */}
+                <ChartCard title="Transactions Trend">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trendsData.timeline}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="transactions"
+                        stroke="#06B6D4"
+                        name="Transactions"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+
+                {/* Revenue Trend */}
+                <ChartCard title="Revenue Trend">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trendsData.timeline}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip formatter={(value) => (value ? `₹${value}` : "N/A")} />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#EF4444"
+                        name="Revenue"
+                        strokeWidth={2}
+                        connectNulls
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+
+                {/* All Metrics Combined */}
+                <ChartCard title="All Metrics Overview">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={trendsData.timeline}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="leads"
+                        stroke="#3B82F6"
+                        name="Leads"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="admissions"
+                        stroke="#F59E0B"
+                        name="Admissions"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="transactions"
+                        stroke="#06B6D4"
+                        name="Transactions"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartCard>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow p-6">
+                <p className="text-gray-500 text-center py-8">No trends data available for the selected date range</p>
               </div>
             )}
           </div>
