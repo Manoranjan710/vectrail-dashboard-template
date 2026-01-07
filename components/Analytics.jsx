@@ -247,24 +247,43 @@ export default function Analytics() {
       ) : data ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Leads Section */}
-          <SectionCard title="Leads" icon={BarChart3} color="#3B82F6">
-            <StatItem
-              title="Total Leads"
-              value={data.leads.total.toLocaleString()}
-            />
-            <StatItem
-              title="Qualified"
-              value={data.leads.qualified.toLocaleString()}
-            />
-            <StatItem
-              title="Converted"
-              value={data.leads.converted.toLocaleString()}
-            />
-            <StatItem
-              title="Qualification Rate"
-              value={`${data.leads.qualification_rate}%`}
-            />
-          </SectionCard>
+        <SectionCard title="Leads" icon={BarChart3} color="#3B82F6">
+          <StatItem
+            title="Total Leads"
+            value={data.leads.total.toLocaleString()}
+          />
+
+          <StatItem
+            title="Enrolled"
+            value={data.leads.enrolled.toLocaleString()}
+          />
+
+          <StatItem
+            title="Dropped"
+            value={data.leads.dropped.toLocaleString()}
+          />
+
+          <StatItem
+            title="RNR"
+            value={data.leads.rnr.toLocaleString()}
+          />
+
+          <StatItem
+            title="Invalid Leads"
+            value={data.leads.invalid.toLocaleString()}
+          />
+
+          <StatItem
+            title="Language Barrier"
+            value={data.leads.language_barrier.toLocaleString()}
+          />
+
+          <StatItem
+            title="Conversion Rate"
+            value={`${data.performance.conversion_rate}%`}
+          />
+        </SectionCard>
+
 
           {/* Admissions Section */}
           <SectionCard title="Admissions" icon={BarChart3} color="#06B6D4">
