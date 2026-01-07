@@ -164,7 +164,7 @@ export default function Analytics() {
   const ownerData = performanceData?.by_owner?.map((item) => ({
     name: `${item.first_name} ${item.last_name}`,
     total_leads: item.total_leads,
-    converted: item.converted,
+    converted: item.enrolled,
     conversion_rate: parseFloat(item.conversion_rate),
     avg_calls: parseFloat(item.avg_calls),
   })) || [];
@@ -172,12 +172,12 @@ export default function Analytics() {
   // Source data
   const sourceData = performanceData?.by_source?.map((item) => {
     let sourceName = item.source_medium;
-    try {
-      const parsed = JSON.parse(item.source_medium);
-      sourceName = parsed.name || "Unknown";
-    } catch (e) {
-      sourceName = item.source_medium;
-    }
+    // try {
+    //   const parsed = JSON.parse(item.source_medium);
+    //   sourceName = parsed.name || "Unknown";
+    // } catch (e) {
+    //   sourceName = item.source_medium;
+    // }
     return {
       name: sourceName,
       leads: item.leads,
