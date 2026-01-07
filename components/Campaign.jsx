@@ -124,11 +124,15 @@ export default function Campaign() {
       0
     ) || 0;
   const totalStudents =
-    revenueData?.by_university?.reduce((sum, u) => sum + u.student_count, 0) ||
+    revenueData?.by_university?.reduce((sum, u) => sum + u.total_students, 0) ||
     0;
   const avgRevenuePerStudent =
     totalStudents > 0 ? (totalRevenue / totalStudents).toFixed(2) : 0;
-  const pendingPayments = revenueData?.pending_payments || 0;
+  const pendingPayments = revenueData?.by_university?.reduce(
+  (sum, u) => sum + (u.total_students - u.paying_students),
+  0
+) || 0;
+
 
   // Top universities by revenue
   const topUniversities =
@@ -168,7 +172,7 @@ export default function Campaign() {
     revenueData?.payment_modes
       ?.filter((p) => p.total_amount !== null)
       ?.map((p) => ({
-        name: p.mode_name,
+        name:'ModeId '+ p.ModeId,
         value: Math.round(parseFloat(p.total_amount) / 100000) / 10, // Convert to lakhs
         transactions: p.transaction_count,
       })) || [];
@@ -636,7 +640,7 @@ export default function Campaign() {
               </ChartCard>
 
               {/* Student Distribution */}
-              <ChartCard title="Student Count by Top Universities">
+              {/* <ChartCard title="Student Count by Top Universities">
                 {topUniversities.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={topUniversities}>
@@ -661,7 +665,7 @@ export default function Campaign() {
                     No student data available
                   </p>
                 )}
-              </ChartCard>
+              </ChartCard> */}
             </div>
 
             {/* Universities Table */}
@@ -705,7 +709,7 @@ export default function Campaign() {
                                 {uni?.UniversityName}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
-                                {uni?.student_count?.toLocaleString?.() || "0"}
+                                {uni?.total_students?.toLocaleString?.() || "0"}
                               </td>
                               <td className="px-6 py-3 text-right text-gray-700">
                                 ₹
@@ -769,7 +773,7 @@ export default function Campaign() {
                               {course?.Course}
                             </td>
                             <td className="px-6 py-3 text-right text-gray-700">
-                              {course?.student_count?.toLocaleString?.() || "0"}
+                              {course?.total_students?.toLocaleString?.() || "0"}
                             </td>
                             <td className="px-6 py-3 text-right text-gray-700">
                               ₹{course?.total_revenue ? parseInt(course.total_revenue).toLocaleString() : "0"}
