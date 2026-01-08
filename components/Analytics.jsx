@@ -591,25 +591,29 @@ export default function Analytics() {
           <div className="grid grid-cols-1 gap-8">
             {/* Channel Details Table */}
             {channelData.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Channel Details</h3>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">Channel Details</h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-gray-700 font-semibold">Channel</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Total Leads</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Qualified</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Conversion Rate</th>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Channel</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Leads</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Qualified</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Conversion Rate</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                       {channelData.map((item, idx) => (
-                        <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="px-6 py-3 text-gray-800">{item.name}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.total_leads}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.qualified_leads}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.conversion_rate.toFixed(2)}%</td>
+                        <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-colors duration-150">
+                          <td className="px-6 py-4 text-sm text-gray-900 font-medium">{item.name}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700 text-right">{item.total_leads}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700 text-right">{item.qualified_leads}</td>
+                          <td className="px-6 py-4 text-sm text-right">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                              {item.conversion_rate.toFixed(2)}%
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -620,27 +624,35 @@ export default function Analytics() {
 
             {/* Owner Details Table */}
             {ownerData.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Sales Owner Performance</h3>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">Sales Owner Performance</h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-gray-700 font-semibold">Owner</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Total Leads</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Converted</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Conversion Rate</th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">Avg Calls</th>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Owner</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Leads</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Converted</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Conversion Rate</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Avg Calls</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                       {ownerData.map((item, idx) => (
-                        <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="px-6 py-3 text-gray-800">{item.name}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.total_leads}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.converted}</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.conversion_rate.toFixed(2)}%</td>
-                          <td className="px-6 py-3 text-right text-gray-700">{item.avg_calls.toFixed(2)}</td>
+                        <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-colors duration-150">
+                          <td className="px-6 py-4 text-sm text-gray-900 font-medium">{item.name}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700 text-right">{item.total_leads}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700 text-right">{item.converted}</td>
+                          <td className="px-6 py-4 text-sm text-right">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                              {item.conversion_rate.toFixed(2)}%
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-right">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                              {item.avg_calls.toFixed(2)}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

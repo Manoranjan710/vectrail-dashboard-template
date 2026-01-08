@@ -24,6 +24,12 @@ import {
   DollarSign,
 } from "lucide-react";
 
+// Utility function to truncate text
+const truncateText = (text, maxLength = 6) => {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
+
 export default function Campaign() {
   const [campaigns, setCampaigns] = useState([]);
   const [revenueData, setRevenueData] = useState(null);
@@ -143,10 +149,7 @@ export default function Campaign() {
       )
       ?.slice(0, 10)
       ?.map((u) => ({
-        name:
-          u.UniversityName.length > 25
-            ? u.UniversityName.substring(0, 22) + "..."
-            : u.UniversityName,
+        name: truncateText(u.UniversityName, 6),
         revenue: Math.round(parseFloat(u.total_revenue) / 100000) / 10, // Convert to lakhs
         fullName: u.UniversityName,
         student_count: u.student_count,
@@ -160,8 +163,7 @@ export default function Campaign() {
       )
       ?.slice(0, 10)
       ?.map((c) => ({
-        name:
-          c.Course.length > 25 ? c.Course.substring(0, 22) + "..." : c.Course,
+        name: truncateText(c.Course, 6),
         revenue: Math.round(parseFloat(c.total_revenue) / 100000) / 10,
         students: c.student_count,
         fullName: c.Course,
@@ -182,10 +184,7 @@ export default function Campaign() {
     .sort((a, b) => b.total_leads - a.total_leads)
     .slice(0, 10)
     .map((c) => ({
-      name:
-        c.campaign_name.length > 30
-          ? c.campaign_name.substring(0, 27) + "..."
-          : c.campaign_name,
+      name: truncateText(c.campaign_name, 6),
       total_leads: c.total_leads,
       qualified_leads: c.qualified_leads,
       converted_leads: c.converted_leads,
@@ -215,10 +214,7 @@ export default function Campaign() {
     )
     .slice(0, 8)
     .map((c) => ({
-      name:
-        c.campaign_name.length > 25
-          ? c.campaign_name.substring(0, 22) + "..."
-          : c.campaign_name,
+      name: truncateText(c.campaign_name, 6),
       conversion_rate: parseFloat(c.conversion_rate),
       fullName: c.campaign_name,
     }));
@@ -316,14 +312,18 @@ export default function Campaign() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      width={100}
                     />
                     <YAxis />
                     <Tooltip
-                      cursor={{ fill: "rgba(0,0,0,0.05)" }}
-                      contentStyle={{
-                        backgroundColor: "#fff",
-                        border: "1px solid #ccc",
-                      }}
+                      content={({ active, payload }) => 
+                        active && payload?.length ? (
+                          <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                            <p className="text-sm font-semibold text-gray-900">{payload[0].payload.fullName}</p>
+                            <p className="text-sm text-gray-700">{payload[0].name}: {payload[0].value}</p>
+                          </div>
+                        ) : null
+                      }
                     />
                     <Legend />
                     <Bar
@@ -353,30 +353,51 @@ export default function Campaign() {
             {/* Leads by Channel Distribution */}
             <ChartCard title="Lead Distribution by Channel">
               {channelData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={channelData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ channel, leads }) =>
-                        `Channel ${channel}: ${leads}`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="leads"
-                    >
-                      {channelData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value} leads`} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div>
+                  <div style={{ marginBottom: '24px' }}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={channelData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="leads"
+                        >
+                          {channelData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => `${value} leads`} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Channel Legend */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {channelData.map((item, idx) => (
+                      <div key={idx}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                          ></span>
+                          <span className="text-gray-700 font-medium text-sm">{item.channel}</span>
+                        </div>
+                        <div className="ml-5">
+                          <p className="text-gray-600 text-sm">{item.leads} leads</p>
+                          <p className="text-gray-500 text-xs">{item.count} campaigns</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <p className="text-gray-500 text-center py-8">
                   No data available
@@ -416,9 +437,19 @@ export default function Campaign() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
+                      width={100}
                     />
                     <YAxis />
-                    <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+                    <Tooltip 
+                      content={({ active, payload }) => 
+                        active && payload?.length ? (
+                          <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                            <p className="text-sm font-semibold text-gray-900">{payload[0].payload.fullName}</p>
+                            <p className="text-sm text-gray-700">{payload[0].value.toFixed(2)}%</p>
+                          </div>
+                        ) : null
+                      }
+                    />
                     <Bar
                       dataKey="conversion_rate"
                       fill="#EF4444"
@@ -436,68 +467,70 @@ export default function Campaign() {
 
           {/* Campaigns Table */}
           {campaigns.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-6">
                 All Campaigns
               </h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-gray-700 font-semibold">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Campaign Name
                       </th>
-                      <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Channel
                       </th>
-                      <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Total Leads
                       </th>
-                      <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Qualified
                       </th>
-                      <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Converted
                       </th>
-                      <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Conversion Rate
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Start Date
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-700 font-semibold">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         End Date
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {campaigns.map((campaign, idx) => (
-                      <tr key={idx} className="border-b hover:bg-gray-50">
+                      <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-colors duration-150">
                         <td
-                          className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
+                          className="px-6 py-4 text-sm text-gray-900 font-medium truncate max-w-xs"
                           title={campaign.campaign_name}
                         >
                           {campaign.campaign_name}
                         </td>
-                        <td className="px-6 py-3 text-right text-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700">
                           {campaign.lead_channel || "—"}
                         </td>
-                        <td className="px-6 py-3 text-right text-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 text-right">
                           {campaign.total_leads}
                         </td>
-                        <td className="px-6 py-3 text-right text-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 text-right">
                           {campaign.qualified_leads}
                         </td>
-                        <td className="px-6 py-3 text-right text-gray-700">
+                        <td className="px-6 py-4 text-sm text-gray-700 text-right">
                           {campaign.converted_leads}
                         </td>
-                        <td className="px-6 py-3 text-right text-gray-700">
-                          {parseFloat(campaign.conversion_rate).toFixed(2)}%
+                        <td className="px-6 py-4 text-sm text-right">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                            {parseFloat(campaign.conversion_rate).toFixed(2)}%
+                          </span>
                         </td>
-                        <td className="px-6 py-3 text-gray-700 text-sm">
+                        <td className="px-6 py-4 text-sm text-gray-700">
                           {new Date(campaign.start_date).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-3 text-gray-700 text-sm">
+                        <td className="px-6 py-4 text-sm text-gray-700">
                           {new Date(campaign.end_date).toLocaleDateString()}
                         </td>
                       </tr>
@@ -563,7 +596,16 @@ export default function Campaign() {
                         height={80}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => `₹${value}L`} />
+                      <Tooltip 
+                        content={({ active, payload }) => 
+                          active && payload?.length ? (
+                            <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                              <p className="text-sm font-semibold text-gray-900">{payload[0].payload.fullName}</p>
+                              <p className="text-sm text-gray-700">₹{payload[0].value}L</p>
+                            </div>
+                          ) : null
+                        }
+                      />
                       <Bar
                         dataKey="revenue"
                         fill="#10B981"
@@ -591,7 +633,16 @@ export default function Campaign() {
                         height={80}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => `₹${value}L`} />
+                      <Tooltip 
+                        content={({ active, payload }) => 
+                          active && payload?.length ? (
+                            <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+                              <p className="text-sm font-semibold text-gray-900">{payload[0].payload.fullName}</p>
+                              <p className="text-sm text-gray-700">₹{payload[0].value}L</p>
+                            </div>
+                          ) : null
+                        }
+                      />
                       <Legend />
                       <Bar
                         dataKey="revenue"
@@ -671,53 +722,54 @@ export default function Campaign() {
             {/* Universities Table */}
             {revenueData.by_university &&
               revenueData.by_university.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-6 mb-8">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">
                     University Revenue Details
                   </h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50 border-b">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-gray-700 font-semibold">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             University Name
                           </th>
-                          <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Students
                           </th>
-                          <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Total Revenue
                           </th>
-                          <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Avg/Student
                           </th>
-                          <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                          <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             Transactions
                           </th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-gray-100">
                         {revenueData.by_university
                           ?.filter((uni) => uni)
                           ?.slice(0, 20)
                           ?.map((uni, idx) => (
-                            <tr key={idx} className="border-b hover:bg-gray-50">
+                            <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-colors duration-150">
                               <td
-                                className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
+                                className="px-6 py-4 text-sm text-gray-900 font-medium truncate max-w-xs"
                                 title={uni?.UniversityName}
                               >
                                 {uni?.UniversityName}
                               </td>
-                              <td className="px-6 py-3 text-right text-gray-700">
+                              <td className="px-6 py-4 text-right text-sm text-gray-700">
                                 {uni?.total_students?.toLocaleString?.() || "0"}
                               </td>
-                              <td className="px-6 py-3 text-right text-gray-700">
-                                ₹
-                                {uni?.total_revenue
-                                  ? parseInt(uni.total_revenue).toLocaleString()
-                                  : "0"}
+                              <td className="px-6 py-4 text-right text-sm text-gray-700">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                  ₹{uni?.total_revenue
+                                    ? parseInt(uni.total_revenue).toLocaleString()
+                                    : "0"}
+                                </span>
                               </td>
-                              <td className="px-6 py-3 text-right text-gray-700">
+                              <td className="px-6 py-4 text-right text-sm text-gray-700">
                                 ₹
                                 {uni?.avg_revenue_per_student
                                   ? parseInt(
@@ -725,7 +777,7 @@ export default function Campaign() {
                                     ).toLocaleString()
                                   : "0"}
                               </td>
-                              <td className="px-6 py-3 text-right text-gray-700">
+                              <td className="px-6 py-4 text-right text-sm text-gray-700">
                                 {uni?.transaction_count?.toLocaleString?.() || "0"}
                               </td>
                             </tr>
@@ -738,47 +790,49 @@ export default function Campaign() {
 
             {/* Courses Table */}
             {revenueData.by_course && revenueData.by_course.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">
                   Course Revenue Details
                 </h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-gray-700 font-semibold">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           Course Name
                         </th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           Students
                         </th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           Total Revenue
                         </th>
-                        <th className="px-6 py-3 text-right text-gray-700 font-semibold">
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                           Avg/Student
                         </th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                       {revenueData.by_course
                         ?.filter((course) => course)
                         ?.slice(0, 20)
                         ?.map((course, idx) => (
-                          <tr key={idx} className="border-b hover:bg-gray-50">
+                          <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-colors duration-150">
                             <td
-                              className="px-6 py-3 text-gray-800 font-medium truncate max-w-xs"
+                              className="px-6 py-4 text-sm text-gray-900 font-medium truncate max-w-xs"
                               title={course?.Course}
                             >
                               {course?.Course}
                             </td>
-                            <td className="px-6 py-3 text-right text-gray-700">
+                            <td className="px-6 py-4 text-right text-sm text-gray-700">
                               {course?.total_students?.toLocaleString?.() || "0"}
                             </td>
-                            <td className="px-6 py-3 text-right text-gray-700">
-                              ₹{course?.total_revenue ? parseInt(course.total_revenue).toLocaleString() : "0"}
+                            <td className="px-6 py-4 text-right text-sm">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                ₹{course?.total_revenue ? parseInt(course.total_revenue).toLocaleString() : "0"}
+                              </span>
                             </td>
-                            <td className="px-6 py-3 text-right text-gray-700">
+                            <td className="px-6 py-4 text-right text-sm text-gray-700">
                               ₹
                               {course?.avg_revenue_per_student
                                 ? parseInt(
