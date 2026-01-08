@@ -438,29 +438,50 @@ export default function Analytics() {
             {/* Lead Status Distribution - Pie Chart */}
             <ChartCard title="Lead Status Distribution">
               {statusChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={statusChartData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value, percentage }) =>
-                        `${name}: ${value} (${percentage}%)`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {statusChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => [`${value} leads`, "Count"]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div>
+                  <div style={{ marginBottom: '24px' }}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={statusChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {statusChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => [`${value} leads`, "Count"]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Status Stats Grid */}
+                  <div className="grid grid-cols-2 gap-6">
+                    {statusChartData.map((item, idx) => (
+                      <div key={idx}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                          ></span>
+                          <span className="text-gray-700 font-medium text-sm">{item.name}</span>
+                        </div>
+                        <div className="ml-5">
+                          <p className="text-gray-600 text-sm">{item.value} leads</p>
+                          <p className="text-gray-500 text-xs">{item.percentage}%</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <p className="text-gray-500 text-center py-8">No data available</p>
               )}
