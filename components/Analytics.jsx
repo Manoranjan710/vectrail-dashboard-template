@@ -26,6 +26,12 @@ import {
   PhoneCall,
 } from "lucide-react";
 
+// Utility function to truncate text
+const truncateText = (text, maxLength = 6) => {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
+
 export default function Analytics() {
   const [data, setData] = useState(null);
   const [performanceData, setPerformanceData] = useState(null);
@@ -154,7 +160,8 @@ export default function Analytics() {
 
   // Channel data for bar chart
   const channelData = performanceData?.by_channel?.map((item) => ({
-    name: item.lead_channel || "Unknown",
+    name: truncateText(item.lead_channel || "Unknown", 6),
+    originalName: item.lead_channel || "Unknown",
     total_leads: item.total_leads,
     qualified_leads: item.qualified_leads,
     conversion_rate: parseFloat(item.conversion_rate),
@@ -162,7 +169,8 @@ export default function Analytics() {
 
   // Owner performance data
   const ownerData = performanceData?.by_owner?.map((item) => ({
-    name: `${item.first_name} ${item.last_name}`,
+    name: truncateText(`${item.first_name} ${item.last_name}`, 6),
+    originalName: `${item.first_name} ${item.last_name}`,
     total_leads: item.total_leads,
     converted: item.enrolled,
     conversion_rate: parseFloat(item.conversion_rate),
@@ -179,7 +187,8 @@ export default function Analytics() {
     //   sourceName = item.source_medium;
     // }
     return {
-      name: sourceName,
+      name: truncateText(sourceName, 6),
+      originalName: sourceName,
       leads: item.leads,
       qualified: item.qualified,
       qualification_rate: parseFloat(item.qualification_rate),
@@ -463,7 +472,7 @@ export default function Analytics() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={channelData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} width={100} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
@@ -482,7 +491,7 @@ export default function Analytics() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={ownerData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} width={100} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
@@ -501,7 +510,7 @@ export default function Analytics() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={sourceData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} width={100} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
@@ -520,7 +529,7 @@ export default function Analytics() {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={ownerData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} width={100} />
                     <YAxis />
                     <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
                     <Legend />
@@ -544,7 +553,7 @@ export default function Analytics() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={ownerData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} width={100} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
