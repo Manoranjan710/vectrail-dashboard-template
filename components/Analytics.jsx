@@ -32,6 +32,23 @@ const truncateText = (text, maxLength = 6) => {
   return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 };
 
+// Utility function to safely format numbers
+const safeFormatNumber = (value, defaultValue = "0") => {
+  if (value === undefined || value === null) return defaultValue;
+  return typeof value === 'number' ? value.toLocaleString() : String(value);
+};
+
+// Utility function to safely access nested properties
+const getSafeValue = (obj, path, defaultValue = "0") => {
+  try {
+    const value = path.split('.').reduce((current, prop) => current?.[prop], obj);
+    if (value === undefined || value === null) return defaultValue;
+    return value;
+  } catch {
+    return defaultValue;
+  }
+};
+
 export default function Analytics() {
   const [data, setData] = useState(null);
   const [performanceData, setPerformanceData] = useState(null);
@@ -259,37 +276,37 @@ export default function Analytics() {
         <SectionCard title="Leads" icon={BarChart3} color="#3B82F6">
           <StatItem
             title="Total Leads"
-            value={data.leads.total.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.total'))}
           />
 
           <StatItem
             title="Enrolled"
-            value={data.leads.enrolled.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.enrolled'))}
           />
 
           <StatItem
             title="Dropped"
-            value={data.leads.dropped.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.dropped'))}
           />
 
           <StatItem
             title="RNR"
-            value={data.leads.rnr.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.rnr'))}
           />
 
           <StatItem
             title="Invalid Leads"
-            value={data.leads.invalid.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.invalid'))}
           />
 
           <StatItem
             title="Language Barrier"
-            value={data.leads.language_barrier.toLocaleString()}
+            value={safeFormatNumber(getSafeValue(data, 'leads.language_barrier'))}
           />
 
           <StatItem
             title="Conversion Rate"
-            value={`${data.performance.conversion_rate}%`}
+            value={`${getSafeValue(data, 'performance.conversion_rate', '0')}%`}
           />
         </SectionCard>
 
@@ -298,15 +315,15 @@ export default function Analytics() {
           <SectionCard title="Admissions" icon={BarChart3} color="#06B6D4">
             <StatItem
               title="Total Admissions"
-              value={data.admissions.total.toLocaleString()}
+              value={safeFormatNumber(getSafeValue(data, 'admissions.total'))}
             />
             <StatItem
               title="Unique Courses"
-              value={data.admissions.unique_courses.toLocaleString()}
+              value={safeFormatNumber(getSafeValue(data, 'admissions.unique_courses'))}
             />
             <StatItem
               title="Unique Universities"
-              value={data.admissions.unique_universities.toLocaleString()}
+              value={safeFormatNumber(getSafeValue(data, 'admissions.unique_universities'))}
             />
           </SectionCard>
 
@@ -314,16 +331,16 @@ export default function Analytics() {
           <SectionCard title="Revenue" icon={BarChart3} color="#10B981">
             <StatItem
               title="Total Revenue"
-              value={`₹${(data.revenue.total / 1000000).toFixed(2)}M`}
-              subtitle={`${data.revenue.transactions.toLocaleString()} transactions`}
+              value={`₹${((getSafeValue(data, 'revenue.total', 0) || 0) / 1000000).toFixed(2)}M`}
+              subtitle={`${safeFormatNumber(getSafeValue(data, 'revenue.transactions'))} transactions`}
             />
             <StatItem
               title="Average Revenue"
-              value={`₹${data.revenue.average.toFixed(2)}`}
+              value={`₹${((getSafeValue(data, 'revenue.average', 0) || 0)).toFixed(2)}`}
             />
             <StatItem
               title="Transactions"
-              value={data.revenue.transactions.toLocaleString()}
+              value={safeFormatNumber(getSafeValue(data, 'revenue.transactions'))}
             />
           </SectionCard>
 
@@ -331,19 +348,19 @@ export default function Analytics() {
           <SectionCard title="Performance" icon={TrendingUp} color="#8B5CF6">
             <StatItem
               title="Conversion Rate"
-              value={data.performance.conversion_rate.toLocaleString()}
+              value={safeFormatNumber(getSafeValue(data, 'performance.conversion_rate'))}
             />
             <StatItem
               title="Active Counselors"
-              value={data.performance.active_counselors}
+              value={getSafeValue(data, 'performance.active_counselors', '0')}
             />
             <StatItem
               title="Avg Calls/Lead"
-              value={data.performance.avg_calls_per_lead}
+              value={getSafeValue(data, 'performance.avg_calls_per_lead', '0')}
             />
             <StatItem
               title="Avg Emails/Lead"
-              value={data.performance.avg_emails_per_lead}
+              value={getSafeValue(data, 'performance.avg_emails_per_lead', '0')}
             />
           </SectionCard>
         </div>
