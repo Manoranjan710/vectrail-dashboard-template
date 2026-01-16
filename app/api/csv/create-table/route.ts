@@ -20,25 +20,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
-    const bytes = await csvFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const csvContent = buffer.toString("utf-8");
+    // Forward request to backend API
+    const backendUrl = process.env.BACKEND_API_URL || "http://localhost:3000";
+    const backendFormData = new FormData();
+    backendFormData.append("csvFile", csvFile);
+    backendFormData.append("tableName", tableName);
 
-    // TODO: Process CSV and create table
-    // This is a placeholder - integrate with your database here
-    console.log(`Creating table: ${tableName}`);
-    console.log(`CSV Content:\n${csvContent.substring(0, 200)}...`);
+    const response = await fetch(`${backendUrl}/api/csv/create-table`, {
+      method: "POST",
+      body: backendFormData,
+    });
 
-    return NextResponse.json(
-      {
-        success: true,
-        tableName: tableName,
-        message: "Table created successfully",
-        rowsInserted: 0,
-      },
-      { status: 200 }
-    );
+    const responseData = await response.json();
+
+    // Return the backend response with its status code
+    return NextResponse.json(responseData, { status: response.status });
   } catch (error) {
     console.error("Error creating table:", error);
     return NextResponse.json(
