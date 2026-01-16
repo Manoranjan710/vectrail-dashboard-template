@@ -4,6 +4,7 @@ import { useState } from "react";
 import Analytics from "@/components/Analytics.jsx";
 import Campaign from "@/components/Campaign.jsx";
 import Chatbot from "@/components/Chatbot.jsx";
+import DataUpload from "@/components/DataUpload.jsx";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("analytics");
@@ -12,6 +13,7 @@ export default function Home() {
     { id: "analytics", label: "Analytics", component: Analytics },
     { id: "campaign", label: "Campaign", component: Campaign },
     { id: "chatbot", label: "Chatbot", component: Chatbot },
+    { id: "dataupload", label: "Data Upload", component: DataUpload },
   ];
 
   const ActiveComponent = tabs.find((tab) => tab.id === activeTab)?.component;
